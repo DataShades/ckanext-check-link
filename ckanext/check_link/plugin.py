@@ -2,41 +2,39 @@ from __future__ import annotations
 
 from typing import Any
 
-import ckan.plugins as plugins
-import ckan.plugins.toolkit as toolkit
+import ckan.plugins as p
+import ckan.plugins.toolkit as tk
 from ckan import model
 
-from . import cli, helpers, views
+from . import cli, views
 from .logic import action, auth
 from .model import Report
 
 CONFIG_CASCADE_DELETE = "ckanext.check_link.remove_reports_when_resource_deleted"
 
 
-class CheckLinkPlugin(plugins.SingletonPlugin):
-    plugins.implements(plugins.IConfigurer)
-    plugins.implements(plugins.IActions)
-    plugins.implements(plugins.IAuthFunctions)
-    plugins.implements(plugins.IBlueprint)
-    plugins.implements(plugins.IClick)
-    plugins.implements(plugins.ITemplateHelpers)
-    plugins.implements(plugins.IDomainObjectModification, inherit=True)
+@tk.blanket.helpers
+class CheckLinkPlugin(p.SingletonPlugin):
+    p.implements(p.IConfigurer)
+    p.implements(p.IActions)
+    p.implements(p.IAuthFunctions)
+    p.implements(p.IBlueprint)
+    p.implements(p.IClick)
+    p.implements(p.IDomainObjectModification, inherit=True)
 
     def notify(self, entity: Any, operation: str) -> None:
-        if isinstance(entity, model.Resource) and entity.state == "deleted":
-            if toolkit.asbool(toolkit.config.get(CONFIG_CASCADE_DELETE)):
-                _remove_resource_report(entity.id)
-
-    # ITemplateHelpers
-
-    def get_helpers(self):
-        return helpers.get_helpers()
+        if (
+            isinstance(entity, model.Resource)
+            and entity.state == "deleted"
+            and tk.asbool(tk.config.get(CONFIG_CASCADE_DELETE))
+        ):
+            _remove_resource_report(entity.id)
 
     # IConfigurer
     def update_config(self, config_):
-        toolkit.add_template_directory(config_, "templates")
-        toolkit.add_public_directory(config_, "public")
-        toolkit.add_resource("assets", "check_link")
+        tk.add_template_directory(config_, "templates")
+        tk.add_public_directory(config_, "public")
+        tk.add_resource("assets", "check_link")
 
     # IActions
     def get_actions(self):

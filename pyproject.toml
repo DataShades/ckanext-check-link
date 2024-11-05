@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-check-link"
-version = "0.1.2.post1"
+version = "0.2.0"
 description = "Resource URL checker"
 classifiers = [ "Development Status :: 4 - Beta", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11",]
 keywords = [ "CKAN",]
@@ -28,6 +28,13 @@ text = "AGPL"
 Homepage = "https://github.com/DataShades/ckanext-check-link"
 
 [project.optional-dependencies]
+dev = [
+    "pytest-ckan",
+    "pytest-factoryboy",
+    "responses",
+    "pytest-httpx",
+    "pytest-asyncio",
+]
 
 [project.entry-points."ckan.plugins"]
 check_link = "ckanext.check_link.plugin:CheckLinkPlugin"
@@ -38,55 +45,78 @@ ckan = "ckan.lib.extract:extract_ckan"
 [tool.setuptools.packages]
 find = {}
 
-[tool.black]
-# line-length = 88
-# preview = true
-
-[tool.ruff]
-target-version = "py38"
+[tool.ruff.lint]
 select = [
-       # "B",  # likely bugs and design problems
+       # "ANN0", # type annotations for function arguments
+       "B",  # likely bugs and design problems
        # "BLE",  # do not catch blind exception
-       # "C40",  # better list/set/dict comprehensions
+       "C4",  # better list/set/dict comprehensions
        # "C90",  # check McCabe complexity
-       # "COM",  # trailing commas
+       # "DTZ", # enforce timezone in date objects
        "E",  # pycodestyle error
        # "W",  # pycodestyle warning
        "F",  # pyflakes
-       # "G",  # format strings for logging statements
-       # "N",  # naming conventions
+       # "FA", # verify annotations from future
+       "G",  # format strings for logging statements
+       "N",  # naming conventions
+       "I",  # isort
+       "ICN", # import conventions
+       # # "D1",  # require doc
+       # "D2",  # doc formatting
+       # "D4",  # doc convention
        # "PL",  # pylint
+       # "PERF", # performance anti-patterns
        # "PT",  # pytest style
-       # "PIE",  # misc lints
-       # "Q",  # preferred quoting style
-       # "RET",  # improvements for return statements
-       # "RSE",  # improvements for rise statements
+       "PIE",  # misc lints
+       "RET",  # improvements for return statements
+       "RSE",  # improvements for rise statements
        # "S",  # security testing
-       # "SIM",  # simplify code
-       # "T10",  # debugging statements
-       # "T20",  # print statements
-       # "TID",  # tidier imports
+       "SIM",  # simplify code
+       "T10",  # debugging statements
+       "T20",  # print statements
+       "TID",  # tidier imports
        # "TRY",  # better exceptions
-       # "UP",  # upgrade syntax for newer versions of the language
+       "UP",  # upgrade syntax for newer versions of the language
 ]
+
 ignore = [
-       # "PT004", # fixture does not return anything, add leading underscore: violated by clean_db
-       # "PLC1901", # simplify comparison to empty string: violated by SQLAlchemy filters
-       "E712", # SQLAlchemy comparision to False
+       "RET503", # don't enforce return-None
+       "E712", # comparison to bool: violated by SQLAlchemy filters
+       "PT004", # fixture does not return anything, add leading underscore: violated by clean_db
+       "PLC1901", # simplify comparison to empty string: violated by SQLAlchemy filters
 ]
 
-[tool.ruff.per-file-ignores]
-"ckanext/check-link/tests*" = [
-                         "S",  # security testing
-                         "PLR2004" # magic value used in comparison
+[tool.ruff.lint.per-file-ignores]
+"ckanext/check_link/tests*" = ["S", "PL", "ANN"]
+"ckanext/check_link/logic/*" = [
+            "D417", # actions don't describe context and data_dict
 ]
 
-[tool.isort]
-known_ckan = "ckan"
-known_ckanext = "ckanext"
-known_self = "ckanext.check-link"
-sections = "FUTURE,STDLIB,FIRSTPARTY,THIRDPARTY,CKAN,CKANEXT,SELF,LOCALFOLDER"
-profile = "black"
+[tool.ruff.lint.flake8-import-conventions.aliases]
+"ckan.plugins" = "p"
+"ckan.plugins.toolkit" = "tk"
+sqlalchemy = "sa"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+section-order = [
+              "future",
+              "standard-library",
+              "first-party",
+              "third-party",
+              "ckan",
+              "ckanext",
+              "self",
+              "local-folder",
+]
+
+[tool.ruff.lint.isort.sections]
+ckan = ["ckan"]
+ckanext = ["ckanext"]
+self = ["ckanext.check_link"]
+
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

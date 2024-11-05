@@ -3,10 +3,10 @@ from __future__ import annotations
 import ckan.plugins.toolkit as tk
 from ckan.logic import validate
 
-from ckanext.check_link.model import Report
 from ckanext.toolbelt.decorators import Collector
 
-from .. import schema
+from ckanext.check_link.logic import schema
+from ckanext.check_link.model import Report
 
 action, get_actions = Collector("check_link").split()
 

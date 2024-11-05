@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import (
     Column,
@@ -66,14 +66,14 @@ class Report(Base):
         return result
 
     @classmethod
-    def by_resource_id(cls, id_: str) -> Optional[Self]:
+    def by_resource_id(cls, id_: str) -> Self | None:
         if not id_:
-            return
+            return None
 
         return model.Session.query(cls).filter(cls.resource_id == id_).one_or_none()
 
     @classmethod
-    def by_url(cls, url: str) -> Optional[Self]:
+    def by_url(cls, url: str) -> Self | None:
         return (
             model.Session.query(cls)
             .filter(cls.resource_id.is_(None), cls.url == url)

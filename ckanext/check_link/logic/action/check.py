@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 from itertools import islice
 from typing import Any, Iterable
@@ -12,7 +13,7 @@ from ckan.logic import validate
 
 from ckanext.toolbelt.decorators import Collector
 
-from .. import schema
+from ckanext.check_link.logic import schema
 
 CONFIG_TIMEOUT = "ckanext.check_link.check.timeout"
 DEFAULT_TIMEOUT = 10
@@ -188,9 +189,7 @@ def _save_reports(context, reports: Iterable[dict[str, Any]], clear: bool):
 
     for report in reports:
         if clear and report["state"] == "available":
-            try:
+            with contextlib.suppress(tk.ObjectNotFound):
                 delete(context.copy(), report)
-            except tk.ObjectNotFound:
-                pass
         else:
             save(context.copy(), report)
