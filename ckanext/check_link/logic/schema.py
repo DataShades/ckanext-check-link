@@ -1,14 +1,17 @@
+from __future__ import annotations
+
+from ckan import types
 from ckan.logic.schema import validator_args
 
 
 @validator_args
 def url_check(
-    not_missing,
-    json_list_or_string,
-    default,
-    convert_to_json_if_string,
-    boolean_validator,
-):
+    not_missing: types.Validator,
+    json_list_or_string: types.Validator,
+    default: types.ValidatorFactory,
+    convert_to_json_if_string: types.Validator,
+    boolean_validator: types.Validator,
+) -> types.Schema:
     return {
         "url": [not_missing, json_list_or_string],
         "save": [default(False), boolean_validator],
@@ -20,12 +23,12 @@ def url_check(
 
 @validator_args
 def resource_check(
-    not_missing,
-    resource_id_exists,
-    boolean_validator,
-    default,
-    convert_to_json_if_string,
-):
+    not_missing: types.Validator,
+    resource_id_exists: types.Validator,
+    boolean_validator: types.Validator,
+    default: types.ValidatorFactory,
+    convert_to_json_if_string: types.Validator,
+) -> types.Schema:
     return {
         "id": [not_missing, resource_id_exists],
         "save": [default(False), boolean_validator],
@@ -36,8 +39,11 @@ def resource_check(
 
 @validator_args
 def base_search_check(
-    boolean_validator, default, int_validator, convert_to_json_if_string
-):
+    boolean_validator: types.Validator,
+    default: types.ValidatorFactory,
+    int_validator: types.Validator,
+    convert_to_json_if_string: types.Validator,
+) -> types.Schema:
     return {
         "save": [default(False), boolean_validator],
         "clear_available": [default(False), boolean_validator],
@@ -52,39 +58,49 @@ def base_search_check(
 
 
 @validator_args
-def package_check(not_missing, package_id_or_name_exists):
+def package_check(
+    not_missing: types.Validator, package_id_or_name_exists: types.Validator
+) -> types.Schema:
     return dict(base_search_check(), id=[not_missing, package_id_or_name_exists])
 
 
 @validator_args
-def organization_check(not_missing, convert_group_name_or_id_to_id):
+def organization_check(
+    not_missing: types.Validator, convert_group_name_or_id_to_id: types.Validator
+) -> types.Schema:
     return dict(base_search_check(), id=[not_missing, convert_group_name_or_id_to_id])
 
 
 @validator_args
-def group_check(not_missing, group_id_or_name_exists):
+def group_check(
+    not_missing: types.Validator, group_id_or_name_exists: types.Validator
+) -> types.Schema:
     return dict(base_search_check(), id=[not_missing, group_id_or_name_exists])
 
 
 @validator_args
-def user_check(not_missing, convert_user_name_or_id_to_id):
+def user_check(
+    not_missing: types.Validator, convert_user_name_or_id_to_id: types.Validator
+) -> types.Schema:
     return dict(base_search_check(), id=[not_missing, convert_user_name_or_id_to_id])
 
 
 @validator_args
-def search_check(unicode_safe, default):
+def search_check(
+    unicode_safe: types.Validator, default: types.ValidatorFactory
+) -> types.Schema:
     return dict(base_search_check(), fq=[default("*:*"), unicode_safe])
 
 
 @validator_args
 def report_save(
-    unicode_safe,
-    resource_id_exists,
-    ignore_missing,
-    not_missing,
-    default,
-    convert_to_json_if_string,
-):
+    unicode_safe: types.Validator,
+    resource_id_exists: types.Validator,
+    ignore_missing: types.Validator,
+    not_missing: types.Validator,
+    default: types.ValidatorFactory,
+    convert_to_json_if_string: types.Validator,
+) -> types.Schema:
     return {
         "id": [ignore_missing, unicode_safe],
         "url": [not_missing, unicode_safe],
@@ -95,7 +111,11 @@ def report_save(
 
 
 @validator_args
-def report_show(unicode_safe, ignore_missing, resource_id_exists):
+def report_show(
+    unicode_safe: types.Validator,
+    ignore_missing: types.Validator,
+    resource_id_exists: types.Validator,
+) -> types.Schema:
     return {
         "id": [ignore_missing, unicode_safe],
         "url": [ignore_missing, unicode_safe],
@@ -105,8 +125,12 @@ def report_show(unicode_safe, ignore_missing, resource_id_exists):
 
 @validator_args
 def report_search(
-    ignore_empty, default, int_validator, boolean_validator, json_list_or_string
-):
+    ignore_empty: types.Validator,
+    default: types.ValidatorFactory,
+    int_validator: types.Validator,
+    boolean_validator: types.Validator,
+    json_list_or_string: types.Validator,
+) -> types.Schema:
     return {
         "limit": [default(10), int_validator],
         "offset": [default(0), int_validator],
@@ -118,5 +142,5 @@ def report_search(
 
 
 @validator_args
-def report_delete(unicode_safe, not_missing):
+def report_delete():
     return report_show()

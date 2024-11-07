@@ -8,6 +8,7 @@ from typing import Any, Iterable
 from check_link import Link, check_all
 
 import ckan.plugins.toolkit as tk
+from ckan import types
 from ckan.lib.search.query import solr_literal
 from ckan.logic import validate
 
@@ -18,13 +19,16 @@ from ckanext.check_link.logic import schema
 CONFIG_TIMEOUT = "ckanext.check_link.check.timeout"
 DEFAULT_TIMEOUT = 10
 
+action: Any
 log = logging.getLogger(__name__)
 action, get_actions = Collector("check_link").split()
 
 
 @action
 @validate(schema.url_check)
-def url_check(context, data_dict):
+def check_link_url_check(
+    context: types.Context, data_dict: dict[str, Any]
+) -> list[dict[str, Any]]:
     tk.check_access("check_link_url_check", context, data_dict)
     timeout: int = tk.asint(tk.config.get(CONFIG_TIMEOUT, DEFAULT_TIMEOUT))
     links: list[Link] = []
@@ -41,7 +45,7 @@ def url_check(context, data_dict):
             else:
                 raise tk.ValidationError({"url": ["Must be a valid URL"]}) from e
 
-    reports = [
+    reports: list[dict[str, Any]] = [
         {
             "url": link.link,
             "state": link.state.name,
@@ -60,7 +64,7 @@ def url_check(context, data_dict):
 
 @action
 @validate(schema.resource_check)
-def resource_check(context, data_dict):
+def check_link_resource_check(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_resource_check", context, data_dict)
     resource = tk.get_action("resource_show")(context, data_dict)
 
@@ -80,7 +84,7 @@ def resource_check(context, data_dict):
 
 @action
 @validate(schema.package_check)
-def package_check(context, data_dict):
+def check_link_package_check(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_package_check", context, data_dict)
     return _search_check(
         context,
@@ -91,7 +95,7 @@ def package_check(context, data_dict):
 
 @action
 @validate(schema.organization_check)
-def organization_check(context, data_dict):
+def check_link_organization_check(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_organization_check", context, data_dict)
 
     return _search_check(
@@ -103,7 +107,7 @@ def organization_check(context, data_dict):
 
 @action
 @validate(schema.group_check)
-def group_check(context, data_dict):
+def check_link_group_check(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_group_check", context, data_dict)
 
     return _search_check(
@@ -113,7 +117,7 @@ def group_check(context, data_dict):
 
 @action
 @validate(schema.user_check)
-def user_check(context, data_dict):
+def check_link_user_check(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_user_check", context, data_dict)
 
     return _search_check(
@@ -125,13 +129,15 @@ def user_check(context, data_dict):
 
 @action
 @validate(schema.search_check)
-def search_check(context, data_dict):
+def check_link_search_check(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_search_check", context, data_dict)
 
     return _search_check(context, data_dict["fq"], data_dict)["reports"]
 
 
-def _search_check(context, fq: str, data_dict: dict[str, Any]):
+def _search_check(
+    context: types.Context, fq: str, data_dict: dict[str, Any]
+) -> dict[str, Any]:
     params = {
         "fq": fq,
         "start": data_dict["start"],
@@ -170,7 +176,9 @@ def _search_check(context, fq: str, data_dict: dict[str, Any]):
     }
 
 
-def _iterate_search(context, params: dict[str, Any]):
+def _iterate_search(
+    context: types.Context, params: dict[str, Any]
+) -> Iterable[dict[str, Any]]:
     params.setdefault("start", 0)
 
     while True:
@@ -183,7 +191,9 @@ def _iterate_search(context, params: dict[str, Any]):
         params["start"] += len(pack["results"])
 
 
-def _save_reports(context, reports: Iterable[dict[str, Any]], clear: bool):
+def _save_reports(
+    context: types.Context, reports: Iterable[dict[str, Any]], clear: bool
+):
     save = tk.get_action("check_link_report_save")
     delete = tk.get_action("check_link_report_delete")
 

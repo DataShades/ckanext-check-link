@@ -1,4 +1,4 @@
-"""add_ondelete_cascade_to_resource_id
+"""add_ondelete_cascade_to_resource_id.
 
 Revision ID: dad15b4f251a
 Revises: 564f2016af51

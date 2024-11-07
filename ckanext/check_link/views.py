@@ -18,9 +18,6 @@ if TYPE_CHECKING:
 CONFIG_BASE_TEMPLATE = "ckanext.check_link.report.base_template"
 DEFAULT_BASE_TEMPLATE = "check_link/base_admin.html"
 
-CONFIG_REPORT_URL = "ckanext.check_link.report.url"
-DEFAULT_REPORT_URL = "/check-link/report/global"
-
 CSV_COLUMNS = [
     "Data Record title",
     "Data Resource title",
@@ -33,26 +30,17 @@ CSV_COLUMNS = [
 
 bp = Blueprint("check_link", __name__)
 
-_initialized = False
+__all__ = ["bp"]
 
 
-def get_blueprints():
-    global _initialized
-    report_url = tk.config.get(CONFIG_REPORT_URL, DEFAULT_REPORT_URL)
-    if not _initialized and report_url:
-        bp.add_url_rule(report_url, view_func=report)
-        _initialized = True
-
-    return [bp]
-
-
+@bp.route("/check-link/report/global")
 def report():
     if not authz.is_authorized_boolean(
         "check_link_view_report_page", {"user": tk.g.user}, {}
     ):
         return tk.abort(403)
 
-    params = {
+    params: dict[str, Any] = {
         "attached_only": True,
         "exclude_state": ["available"],
     }
@@ -104,11 +92,11 @@ def report():
 
 
 class _FakeBuffer:
-    def write(self, value):
+    def write(self, value: Any):
         return value
 
 
-def _stream_csv(reports):
+def _stream_csv(reports: Iterable[dict[str, Any]]):
     writer = csv.writer(_FakeBuffer())
 
     yield writer.writerow(CSV_COLUMNS)

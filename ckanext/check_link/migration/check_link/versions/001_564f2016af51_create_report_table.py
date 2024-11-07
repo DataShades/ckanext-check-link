@@ -1,4 +1,4 @@
-"""Create report table
+"""Create report table.
 
 Revision ID: 564f2016af51
 Revises:

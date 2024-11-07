@@ -15,9 +15,7 @@ from .model import Report
 T = TypeVar("T")
 log = logging.getLogger(__name__)
 
-
-def get_commands():
-    return [check_link]
+__all__ = ["check_link"]
 
 
 @click.group(short_help="Check link availability")
@@ -158,8 +156,8 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
                         "link_patch": {"delay": delay, "timeout": timeout},
                     },
                 )
-            except tk.ValidationError as e:
-                log.error("Cannot check %s: %s", res.id, e)
+            except tk.ValidationError:
+                log.exception("Cannot check %s", res.id)
                 result = {"state": "exception"}
 
             stats[result["state"]] += 1

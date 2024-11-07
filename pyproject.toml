@@ -47,7 +47,7 @@ find = {}
 
 [tool.ruff.lint]
 select = [
-       # "ANN0", # type annotations for function arguments
+       "ANN0", # type annotations for function arguments
        "B",  # likely bugs and design problems
        # "BLE",  # do not catch blind exception
        "C4",  # better list/set/dict comprehensions
@@ -56,17 +56,17 @@ select = [
        "E",  # pycodestyle error
        # "W",  # pycodestyle warning
        "F",  # pyflakes
-       # "FA", # verify annotations from future
+       "FA", # verify annotations from future
        "G",  # format strings for logging statements
        "N",  # naming conventions
        "I",  # isort
        "ICN", # import conventions
        # # "D1",  # require doc
-       # "D2",  # doc formatting
-       # "D4",  # doc convention
+       "D2",  # doc formatting
+       "D4",  # doc convention
        # "PL",  # pylint
        # "PERF", # performance anti-patterns
-       # "PT",  # pytest style
+       "PT",  # pytest style
        "PIE",  # misc lints
        "RET",  # improvements for return statements
        "RSE",  # improvements for rise statements
@@ -75,7 +75,7 @@ select = [
        "T10",  # debugging statements
        "T20",  # print statements
        "TID",  # tidier imports
-       # "TRY",  # better exceptions
+       "TRY",  # better exceptions
        "UP",  # upgrade syntax for newer versions of the language
 ]
 

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from typing import Any
+
 import ckan.plugins.toolkit as tk
+from ckan import types
 from ckan.logic import validate
 
 from ckanext.toolbelt.decorators import Collector
@@ -8,12 +11,13 @@ from ckanext.toolbelt.decorators import Collector
 from ckanext.check_link.logic import schema
 from ckanext.check_link.model import Report
 
+action: Any
 action, get_actions = Collector("check_link").split()
 
 
 @action
 @validate(schema.report_save)
-def report_save(context, data_dict):
+def report_save(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_report_save", context, data_dict)
     sess = context["session"]
     data_dict["details"].update(data_dict.pop("__extras", {}))
@@ -41,7 +45,7 @@ def report_save(context, data_dict):
 
 @action
 @validate(schema.report_show)
-def report_show(context, data_dict):
+def report_show(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_report_show", context, data_dict)
 
     if "id" in data_dict:
@@ -61,14 +65,14 @@ def report_show(context, data_dict):
         )
 
     if not report:
-        raise tk.ObjectNotFound("Report not found")
+        raise tk.ObjectNotFound("report")
 
     return report.dictize(context)
 
 
 @action
 @validate(schema.report_search)
-def report_search(context, data_dict):
+def report_search(context: types.Context, data_dict: dict[str, Any]) -> dict[str, Any]:
     tk.check_access("check_link_report_search", context, data_dict)
     q = context["session"].query(Report)
 
@@ -109,7 +113,7 @@ def report_search(context, data_dict):
 
 @action
 @validate(schema.report_delete)
-def report_delete(context, data_dict):
+def report_delete(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_report_delete", context, data_dict)
     sess = context["session"]
 

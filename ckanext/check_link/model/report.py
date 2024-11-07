@@ -3,20 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-    ForeignKey,
-    String,
-    UnicodeText,
-    UniqueConstraint,
-)
+import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, relationship
 from typing_extensions import Self
 
-import ckan.model as model
+from ckan import model, types
 from ckan.lib.dictization import table_dictize
 from ckan.lib.dictization.model_dictize import resource_dictize
 from ckan.model.types import make_uuid
@@ -25,19 +18,30 @@ from .base import Base
 
 
 class Report(Base):
-    __tablename__ = "check_link_report"
-
-    id = Column(UnicodeText, primary_key=True, default=make_uuid)
-    url = Column(UnicodeText, nullable=False)
-    state = Column(String(20), nullable=False)
-
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-
-    resource_id = Column(
-        UnicodeText, ForeignKey(model.Resource.id), nullable=True, unique=True
+    __table__ = sa.Table(
+        "check_link_report",
+        Base.metadata,
+        sa.Column("id", sa.UnicodeText, primary_key=True, default=make_uuid),
+        sa.Column("url", sa.UnicodeText, nullable=False),
+        sa.Column("state", sa.String(20), nullable=False),
+        sa.Column("created_at", sa.DateTime, nullable=False, default=datetime.utcnow),
+        sa.Column(
+            "resource_id",
+            sa.UnicodeText,
+            sa.ForeignKey(model.Resource.id),
+            nullable=True,
+            unique=True,
+        ),
+        sa.Column("details", JSONB, nullable=False, default=dict),
+        sa.UniqueConstraint("url", "resource_id"),
     )
 
-    details = Column(JSONB, nullable=False, default=dict)
+    id: Mapped[str]
+    url: Mapped[str]
+    state: Mapped[str]
+    created_at: Mapped[datetime]
+    resource_id: Mapped[str | None]
+    details: Mapped[dict[str, Any]]
 
     package_id = association_proxy("resource", "package_id")
     package = association_proxy("resource", "package")
@@ -49,12 +53,10 @@ class Report(Base):
         ),
     )
 
-    UniqueConstraint(url, resource_id)
-
     def touch(self):
         self.created_at = datetime.utcnow()
 
-    def dictize(self, context: dict[str, Any]) -> dict[str, Any]:
+    def dictize(self, context: types.Context) -> dict[str, Any]:
         result = table_dictize(self, context, package_id=self.package_id)
 
         if context.get("include_resource") and self.resource_id:
