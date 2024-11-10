@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [v0.2.1](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.2.1) - 2024-11-10
+
+<small>[Compare with v0.2.0](https://github.com/DataShades/ckanext-check-link/compare/v0.2.0...v0.2.1)</small>
+
+### Features
+
+- separate collections for package and organization reports ([2271df4](https://github.com/DataShades/ckanext-check-link/commit/2271df461180e3909ad2bb89c6efdabb746c07ad) by Sergey Motornyuk).
+
 ## [v0.2.0](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.2.0) - 2024-11-10
 
 <small>[Compare with v0.1.2](https://github.com/DataShades/ckanext-check-link/compare/v0.1.2...v0.2.0)</small>
