@@ -6,9 +6,10 @@ from itertools import islice
 from typing import Iterable, TypeVar
 
 import click
+import sqlalchemy as sa
 
-import ckan.model as model
 import ckan.plugins.toolkit as tk
+from ckan import model, types
 
 from .model import Report
 
@@ -61,7 +62,7 @@ def check_packages(
 
     """
     user = tk.get_action("get_site_user")({"ignore_auth": True}, {})
-    context = {"user": user["name"]}
+    context = types.Context(user=user["name"])
 
     check = tk.get_action("check_link_search_check")
     states = ["active"]
@@ -69,29 +70,28 @@ def check_packages(
     if include_draft:
         states.append("draft")
 
-    q = model.Session.query(model.Package.id).filter(
-        model.Package.state.in_(states),
-    )
+    stmt = sa.select(model.Package.id).where(model.Package.state.in_(states))
 
     if not include_private:
-        q = q.filter(model.Package.private == False)
+        stmt = stmt.where(model.Package.private == False)
 
     if ids:
-        q = q.filter(model.Package.id.in_(ids) | model.Package.name.in_(ids))
+        stmt = stmt.where(model.Package.id.in_(ids) | model.Package.name.in_(ids))
 
     stats = Counter()
-    with click.progressbar(q, length=q.count()) as bar:
+    total = model.Session.scalar(sa.select(sa.func.count()).select_from(stmt))
+    with click.progressbar(model.Session.scalars(stmt), length=total) as bar:
         while True:
             buff = _take(bar, chunk)
             if not buff:
                 break
 
             result = check(
-                context.copy(),
+                tk.fresh_context(context),
                 {
-                    "fq": "id:({})".format(" OR ".join(p.id for p in buff)),
+                    "fq": "id:({})".format(" OR ".join(buff)),
                     "save": True,
-                    "clear_available": True,
+                    "clear_available": False,
                     "include_drafts": include_draft,
                     "include_private": include_private,
                     "skip_invalid": True,

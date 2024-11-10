@@ -1,0 +1,5 @@
+{% extends "organization/read_base.html" %}
+
+{% block primary_content_inner %}
+    {{ collection.serializer.serialize() | safe }}
+{% endblock  %}

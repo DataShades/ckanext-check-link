@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
 
-import ckan.model as model
+from ckan import model
 
 Base = declarative_base(metadata=model.meta.metadata)

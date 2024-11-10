@@ -60,4 +60,10 @@ def check_link_report_delete(context: types.Context, data_dict: dict[str, Any]):
 
 
 def check_link_view_report_page(context: types.Context, data_dict: dict[str, Any]):
+    if pkg_id := data_dict.get("package_id"):
+        return authz.is_authorized("package_update", context, {"id": pkg_id})
+
+    if org_id := data_dict.get("organization_id"):
+        return authz.is_authorized("organization_update", context, {"id": org_id})
+
     return authz.is_authorized("sysadmin", context, data_dict)

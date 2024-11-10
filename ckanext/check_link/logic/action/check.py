@@ -21,7 +21,7 @@ DEFAULT_TIMEOUT = 10
 
 action: Any
 log = logging.getLogger(__name__)
-action, get_actions = Collector("check_link").split()
+action, get_actions = Collector().split()
 
 
 @action

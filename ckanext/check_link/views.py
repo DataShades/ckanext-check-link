@@ -1,22 +1,21 @@
 from __future__ import annotations
 
 import csv
-import datetime
 from typing import TYPE_CHECKING, Any, Iterable
 
 from flask import Blueprint
 
-import ckan.authz as authz
 import ckan.plugins.toolkit as tk
-from ckan import model
-from ckan.common import streaming_response
-from ckan.lib.helpers import Page
+from ckan import authz, model
+from ckan.logic import parse_params
+
+from ckanext.collection import shared
+
+from ckanext.check_link.model import Report
 
 if TYPE_CHECKING:
     from ckan.types import Context
 
-CONFIG_BASE_TEMPLATE = "ckanext.check_link.report.base_template"
-DEFAULT_BASE_TEMPLATE = "check_link/base_admin.html"
 
 CSV_COLUMNS = [
     "Data Record title",
@@ -33,60 +32,119 @@ bp = Blueprint("check_link", __name__)
 __all__ = ["bp"]
 
 
+@bp.route("/organization/<organization_id>/check-link/report")
+def organization_report(organization_id: str):
+    if not authz.is_authorized_boolean(
+        "check_link_view_report_page",
+        {"user": tk.g.user},
+        {"organization_id": organization_id},
+    ):
+        return tk.abort(403)
+
+    try:
+        org_dict = tk.get_action("organization_show")({}, {"id": organization_id})
+    except tk.ObjectNotFound:
+        return tk.abort(404)
+
+    col_name = "check-link-report"
+    params: dict[str, Any] = {
+        f"{col_name}:attached_only": True,
+        f"{col_name}:exclude_state": ["available"],
+    }
+    params.update(parse_params(tk.request.args))
+
+    data_settings: dict[str, Any] = {
+        "static_sources": {
+            "resource": model.Resource,
+            "package": model.Package,
+        },
+        "static_joins": [
+            ("resource", model.Resource.id == Report.resource_id, False),
+            ("package", model.Resource.package_id == model.Package.id, False),
+        ],
+        "static_filters": [model.Package.owner_org == org_dict["id"]],
+    }
+
+    collection = shared.get_collection(col_name, params, data_settings=data_settings)
+
+    return tk.render(
+        "check_link/organization_report.html",
+        {
+            "collection": collection,
+            "group_dict": org_dict,
+            "group_type": org_dict["type"],
+        },
+    )
+
+
+@bp.route("/dataset/<package_id>/check-link/report")
+def package_report(package_id: str):
+    if not authz.is_authorized_boolean(
+        "check_link_view_report_page", {"user": tk.g.user}, {"package_id": package_id}
+    ):
+        return tk.abort(403)
+
+    try:
+        pkg_dict = tk.get_action("package_show")({}, {"id": package_id})
+    except tk.ObjectNotFound:
+        return tk.abort(404)
+
+    col_name = "check-link-report"
+    params: dict[str, Any] = {
+        f"{col_name}:attached_only": True,
+        f"{col_name}:exclude_state": ["available"],
+    }
+    params.update(parse_params(tk.request.args))
+
+    data_settings: dict[str, Any] = {
+        "static_sources": {
+            "resource": model.Resource,
+        },
+        "static_joins": [
+            ("resource", model.Resource.id == Report.resource_id, False),
+        ],
+        "static_filters": [model.Resource.package_id == pkg_dict["id"]],
+    }
+
+    collection = shared.get_collection(col_name, params, data_settings=data_settings)
+
+    return tk.render(
+        "check_link/package_report.html",
+        {
+            "collection": collection,
+            "pkg_dict": pkg_dict,
+        },
+    )
+
+
 @bp.route("/check-link/report/global")
-def report():
+def report(
+    organization_id: str | None = None,
+    package_id: str | None = None,
+):
     if not authz.is_authorized_boolean(
         "check_link_view_report_page", {"user": tk.g.user}, {}
     ):
         return tk.abort(403)
 
+    col_name = "check-link-report"
     params: dict[str, Any] = {
-        "attached_only": True,
-        "exclude_state": ["available"],
+        f"{col_name}:attached_only": True,
+        f"{col_name}:exclude_state": ["available"],
     }
+    params.update(parse_params(tk.request.args))
 
-    fmt = tk.request.args.get("format")
-    if fmt == "csv":
-        resp = streaming_response(
-            _stream_csv(
-                _iterate_resuts("check_link_report_search", params, {"user": tk.g.user})
-            ),
-            mimetype="text/csv",
-            with_context=True,
-        )
-        today = datetime.date.today()
-        resp.headers[
-            "content-disposition"
-        ] = f'attachment; filename="VPSDDLinkReport-{today:%d%m%Y}.csv"'
-        return resp
+    data_settings = {}
 
-    try:
-        page = max(1, tk.asint(tk.request.args.get("page", 1)))
-    except ValueError:
-        page = 1
+    collection = shared.get_collection(col_name, params, data_settings=data_settings)
 
-    per_page = 10
-    reports = tk.get_action("check_link_report_search")(
-        {},
-        dict(params, limit=per_page, offset=per_page * page - per_page),
-    )
+    base_template = "check_link/base_admin.html"
 
-    def pager_url(*args: Any, **kwargs: Any):
-        return tk.url_for("check_link.report", **kwargs)
-
-    base_template = tk.config.get(CONFIG_BASE_TEMPLATE, DEFAULT_BASE_TEMPLATE)
     return tk.render(
-        "check_link/report.html",
+        "check_link/global_report.html",
         {
+            "collection": collection,
             "base_template": base_template,
-            "page": Page(
-                reports["results"],
-                url=pager_url,
-                page=page,
-                item_count=reports["count"],
-                items_per_page=per_page,
-                presliced_list=True,
-            ),
         },
     )
 

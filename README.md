@@ -38,7 +38,7 @@ Compatibility with core CKAN versions:
    pip install ckanext-check-link
    ```
 
-1. Add `check_link` to the `ckan.plugins` setting in your CKAN config file.
+1. Add `check_link` and `collection` to the `ckan.plugins` setting in your CKAN config file.
 
 
 ## Config settings

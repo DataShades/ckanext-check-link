@@ -1,0 +1,57 @@
+{% extends base_template %}
+
+{% block check_link_breadcrumb %}
+    {{ super() }}
+    <li class="active">
+        {{ _("Global") }}
+    </li>
+{% endblock %}
+
+{% block check_link_content %}
+    {{ collection.serializer.serialize() | safe }}
+{% endblock check_link_content %}
+
+
+{% block check_link_help_text %}
+    {% trans %}
+    <p>
+        Brief overview of the current state of the links within the portal.
+    </p>
+
+    <p>
+        Possible states are:
+
+        <div>
+            <p>
+                <strong>Unknown</strong>
+                <span>Link has not been checked yet</span>
+            </p>
+            <p>
+                <strong>Available</strong>
+                <span>Link is available</span>
+            </p>
+            <p>
+                <strong>Moved</strong>
+                <span>Link contains a redirect to the differens URL</span>
+            </p>
+            <p>
+                <strong>Missing</strong>
+                <span>Link points to the page that does not exist</span>
+            </p>
+            <p>
+                <strong>Protected</strong>
+                <span>Link points to the page that requires authentication</span>
+            </p>
+            <p>
+                <strong>Invalid</strong>
+                <span>Link points to an existing location, but requests are rejected</span>
+            </p>
+            <p>
+                <strong>Error</strong>
+                <span>Link cannot be checked because it mailformed or points to an unexisting location</span>
+            </p>
+        </div>
+    </p>
+    {% endtrans %}
+
+{% endblock check_link_help_text %}

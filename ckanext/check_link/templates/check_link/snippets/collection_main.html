@@ -1,0 +1,49 @@
+{% set form_id = collection.serializer.form_id %}
+{% set base_class = collection.serializer.base_class %}
+
+{% if collection.data.total %}
+    {% block form %}
+        <form
+            {% block form_attrs %}
+                class="{{ base_class }}--form" id="{{ form_id }}"
+            {% endblock form_attrs %}
+        >
+
+            {# this input catches search field submissions. Without it, submission
+            will include one of page navigation links, which are also implemented
+            as a submit #}
+            <input type="submit" hidden>
+
+        </form>
+    {% endblock form%}
+
+
+    <div class="content-actions">
+        <ul class="list-unstyled">
+            {% block check_link_actions %}
+                <li>
+                    <a class="btn btn-primary" href="{{ h.url_for('ckanext-collection.export', **dict(request.args, format='csv', name=collection.name)) }}">
+                        {{ _("Download as CSV") }}
+                    </a>
+                </li>
+            {% endblock check_link_actions %}
+        </ul>
+    </div>
+
+    <div class="check-link-reports">
+
+        {%- for record in collection %}
+            {%- snippet collection.serializer.record_template, record=record, collection=collection -%}
+        {% endfor -%}
+    </div>
+
+    {% block check_link_pagination %}
+        {% if collection.data.total %}
+            {%- snippet collection.serializer.pager_template, collection=collection -%}
+        {% endif %}
+    {% endblock %}
+{% else %}
+    <p class="text-center text-muted">
+        {{ _("At the moment there are no available reports") }}
+    </p>
+{% endif %}
