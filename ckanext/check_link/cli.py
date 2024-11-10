@@ -105,7 +105,7 @@ def check_packages(
                 {
                     "fq": "id:({})".format(" OR ".join(buff)),
                     "save": True,
-                    "clear_available": False,
+                    "clear_available": True,
                     "include_drafts": include_draft,
                     "include_private": include_private,
                     "skip_invalid": True,
