@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-check-link"
-version = "0.2.1"
+version = "0.2.2.a0"
 description = "Resource URL checker"
 classifiers = [ "Development Status :: 4 - Beta", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11",]
 keywords = [ "CKAN",]
-dependencies = [ "check-link~=0.0.10", "typing-extensions", "ckanext-toolbelt", "ckanext-collection"]
+dependencies = [ "check-link~=0.0.11", "typing-extensions", "ckanext-toolbelt", "ckanext-collection"]
 authors = [
     {name = "DataShades", email = "datashades@linkdigital.com.au"},
     {name = "Sergey Motornyuk", email = "sergey.motornyuk@linkdigital.com.au"},
