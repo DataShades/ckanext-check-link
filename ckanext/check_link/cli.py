@@ -46,6 +46,11 @@ def check_link():
 @click.option(
     "-t", "--timeout", default=10, help="Request timeout", type=click.FloatRange(0)
 )
+@click.option(
+    "-o",
+    "--organization",
+    help="Check packages of specific organization",
+)
 @click.argument("ids", nargs=-1)
 def check_packages(
     include_draft: bool,
@@ -54,6 +59,7 @@ def check_packages(
     chunk: int,
     delay: float,
     timeout: float,
+    organization: str | None,
 ):
     """Check every resource inside each package.
 
@@ -71,6 +77,14 @@ def check_packages(
         states.append("draft")
 
     stmt = sa.select(model.Package.id).where(model.Package.state.in_(states))
+
+    if organization:
+        stmt = stmt.join(model.Group, model.Package.owner_org == model.Group.id).where(
+            sa.or_(
+                model.Group.id == organization,
+                model.Group.name == organization,
+            )
+        )
 
     if not include_private:
         stmt = stmt.where(model.Package.private == False)

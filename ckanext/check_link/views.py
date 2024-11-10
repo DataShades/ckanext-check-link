@@ -46,25 +46,14 @@ def organization_report(organization_id: str):
     except tk.ObjectNotFound:
         return tk.abort(404)
 
-    col_name = "check-link-report"
+    col_name = "check-link-organization-report"
     params: dict[str, Any] = {
         f"{col_name}:attached_only": True,
         f"{col_name}:exclude_state": ["available"],
     }
     params.update(parse_params(tk.request.args))
 
-    data_settings: dict[str, Any] = {
-        "static_sources": {
-            "resource": model.Resource,
-            "package": model.Package,
-        },
-        "static_joins": [
-            ("resource", model.Resource.id == Report.resource_id, False),
-            ("package", model.Resource.package_id == model.Package.id, False),
-        ],
-        "static_filters": [model.Package.owner_org == org_dict["id"]],
-    }
-
+    data_settings: dict[str, Any] = {"organization_id": org_dict["id"]}
     collection = shared.get_collection(col_name, params, data_settings=data_settings)
 
     return tk.render(
@@ -89,31 +78,19 @@ def package_report(package_id: str):
     except tk.ObjectNotFound:
         return tk.abort(404)
 
-    col_name = "check-link-report"
+    col_name = "check-link-package-report"
     params: dict[str, Any] = {
         f"{col_name}:attached_only": True,
         f"{col_name}:exclude_state": ["available"],
     }
     params.update(parse_params(tk.request.args))
 
-    data_settings: dict[str, Any] = {
-        "static_sources": {
-            "resource": model.Resource,
-        },
-        "static_joins": [
-            ("resource", model.Resource.id == Report.resource_id, False),
-        ],
-        "static_filters": [model.Resource.package_id == pkg_dict["id"]],
-    }
-
+    data_settings: dict[str, Any] = {"package_id": pkg_dict["id"]}
     collection = shared.get_collection(col_name, params, data_settings=data_settings)
 
     return tk.render(
         "check_link/package_report.html",
-        {
-            "collection": collection,
-            "pkg_dict": pkg_dict,
-        },
+        {"collection": collection, "pkg_dict": pkg_dict},
     )
 
 
