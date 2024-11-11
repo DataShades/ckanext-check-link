@@ -6,12 +6,11 @@ from typing import TYPE_CHECKING, Any, Iterable
 from flask import Blueprint
 
 import ckan.plugins.toolkit as tk
-from ckan import authz, model
+from ckan import  model
 from ckan.logic import parse_params
 
 from ckanext.collection import shared
 
-from ckanext.check_link.model import Report
 
 if TYPE_CHECKING:
     from ckan.types import Context
@@ -34,11 +33,13 @@ __all__ = ["bp"]
 
 @bp.route("/organization/<organization_id>/check-link/report")
 def organization_report(organization_id: str):
-    if not authz.is_authorized_boolean(
-        "check_link_view_report_page",
-        {"user": tk.g.user},
-        {"organization_id": organization_id},
-    ):
+    try:
+        tk.check_access(
+            "check_link_view_report_page",
+            {"user": tk.g.user},
+            {"organization_id": organization_id},
+        )
+    except tk.NotAuthorized:
         return tk.abort(403)
 
     try:
@@ -68,9 +69,13 @@ def organization_report(organization_id: str):
 
 @bp.route("/dataset/<package_id>/check-link/report")
 def package_report(package_id: str):
-    if not authz.is_authorized_boolean(
-        "check_link_view_report_page", {"user": tk.g.user}, {"package_id": package_id}
-    ):
+    try:
+        tk.check_access(
+            "check_link_view_report_page",
+            {"user": tk.g.user},
+            {"package_id": package_id},
+        )
+    except tk.NotAuthorized:
         return tk.abort(403)
 
     try:
@@ -99,9 +104,13 @@ def report(
     organization_id: str | None = None,
     package_id: str | None = None,
 ):
-    if not authz.is_authorized_boolean(
-        "check_link_view_report_page", {"user": tk.g.user}, {}
-    ):
+    try:
+        tk.check_access(
+            "check_link_view_report_page",
+            {"user": tk.g.user},
+            {},
+        )
+    except tk.NotAuthorized:
         return tk.abort(403)
 
     col_name = "check-link-report"
