@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [v0.2.2](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.2.2) - 2024-11-11
+
+<small>[Compare with v0.2.1](https://github.com/DataShades/ckanext-check-link/compare/v0.2.1...v0.2.2)</small>
+
+### Bug Fixes
+
+- auth functions for views do not work ([8f94d4e](https://github.com/DataShades/ckanext-check-link/commit/8f94d4edccf97a88551f0aec0e03767bf21476b6) by Sergey Motornyuk).
+
 ## [v0.2.1](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.2.1) - 2024-11-10
 
 <small>[Compare with v0.2.0](https://github.com/DataShades/ckanext-check-link/compare/v0.2.0...v0.2.1)</small>
