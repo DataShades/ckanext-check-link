@@ -5,7 +5,7 @@ collection
 {% set total = collection.data | length %}
 
 {% set pos_first = collection.pager.start + 1 %}
-{% set pos_last = pos_first + collection.pager.size - 1 %}
+{% set pos_last = [pos_first + collection.pager.size - 1, total] | min %}
 
 {% set current_page_number = collection.pager.page %}
 {# if first item is greater that total number of items,
