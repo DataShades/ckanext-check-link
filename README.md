@@ -38,8 +38,12 @@ Compatibility with core CKAN versions:
    pip install ckanext-check-link
    ```
 
-1. Add `check_link` and `collection` to the `ckan.plugins` setting in your CKAN config file.
+2. Add `check_link` and `collection` to the `ckan.plugins` setting in your CKAN config file.
 
+3. Initialize the database tables.
+    ```sh
+    ckan -c /path/to/your/ckan.ini db pending-migrations --apply
+    ```
 
 ## Config settings
 
