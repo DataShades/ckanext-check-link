@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [v0.3.1](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.3.1) - 2025-05-26
+
+<small>[Compare with v0.3.0](https://github.com/DataShades/ckanext-check-link/compare/v0.3.0...v0.3.1)</small>
+
+### Bug Fixes
+
+- CSV report is missing ID of the entity ([2f6b1ee](https://github.com/DataShades/ckanext-check-link/commit/2f6b1eef6f62c8aee2d2e6bbc0bce2094cd01c53) by Sergey Motornyuk).
+
+## [v0.3.0](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.3.0) - 2025-03-11
+
+<small>[Compare with v0.2.2](https://github.com/DataShades/ckanext-check-link/compare/v0.2.2...v0.3.0)</small>
+
+### Bug Fixes
+
+- add namespace_packages to setup.cfg ([00e8d14](https://github.com/DataShades/ckanext-check-link/commit/00e8d1477c260fa7340730c54c9af795a5a7bb18) by mutantsan).
+- correct value of last position in pagination ([b0817fc](https://github.com/DataShades/ckanext-check-link/commit/b0817fce20afd409553de5883dce3dc7c712698e) by oleksandrivaniuk).
+
 ## [v0.2.2](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.2.2) - 2024-11-11
 
 <small>[Compare with v0.2.1](https://github.com/DataShades/ckanext-check-link/compare/v0.2.1...v0.2.2)</small>
