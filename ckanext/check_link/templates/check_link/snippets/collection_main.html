@@ -21,8 +21,12 @@
     <div class="content-actions">
         <ul class="list-unstyled">
             {% block check_link_actions %}
+                {% set extras = {collection.name ~ ":package_id": collection.data.package_id} if collection.data.package_id else {collection.name ~ ":organization_id": collection.data.organization_id} if collection.data.organization_id else {} %}
+
+                {% set url = h.url_for('ckanext-collection.export', **dict(request.args, format='csv', name=collection.name, **extras)) %}
+
                 <li>
-                    <a class="btn btn-primary" href="{{ h.url_for('ckanext-collection.export', **dict(request.args, format='csv', name=collection.name)) }}">
+                    <a class="btn btn-primary" href="{{ url }}">
                         {{ _("Download as CSV") }}
                     </a>
                 </li>

@@ -60,7 +60,9 @@ class LinkData(shared.data.ModelData[Report, "LinkCollection"]):
 
 
 class PackageLinkData(LinkData):
-    package_id: str = shared.configurable_attribute()
+    package_id: str = shared.configurable_attribute(
+        default_factory=lambda self: self.attached.params.get("package_id")
+    )
 
     def alter_statement(self, stmt: sa.select):
         stmt = super().alter_statement(stmt)
@@ -68,7 +70,9 @@ class PackageLinkData(LinkData):
 
 
 class OrganizationLinkData(LinkData):
-    organization_id: str = shared.configurable_attribute()
+    organization_id: str = shared.configurable_attribute(
+        default_factory=lambda self: self.attached.params.get("organization_id")
+    )
 
     def alter_statement(self, stmt: sa.select):
         stmt = super().alter_statement(stmt)

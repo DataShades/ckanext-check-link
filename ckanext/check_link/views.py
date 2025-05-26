@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Iterable
 from flask import Blueprint
 
 import ckan.plugins.toolkit as tk
-from ckan import  model
+from ckan import model
 from ckan.logic import parse_params
 
 from ckanext.collection import shared
@@ -53,9 +53,9 @@ def organization_report(organization_id: str):
         f"{col_name}:exclude_state": ["available"],
     }
     params.update(parse_params(tk.request.args))
+    params[f"{col_name}:organization_id"] = org_dict["id"]
 
-    data_settings: dict[str, Any] = {"organization_id": org_dict["id"]}
-    collection = shared.get_collection(col_name, params, data_settings=data_settings)
+    collection = shared.get_collection(col_name, params)
 
     return tk.render(
         "check_link/organization_report.html",
@@ -89,9 +89,8 @@ def package_report(package_id: str):
         f"{col_name}:exclude_state": ["available"],
     }
     params.update(parse_params(tk.request.args))
-
-    data_settings: dict[str, Any] = {"package_id": pkg_dict["id"]}
-    collection = shared.get_collection(col_name, params, data_settings=data_settings)
+    params[f"{col_name}:package_id"] = pkg_dict["id"]
+    collection = shared.get_collection(col_name, params)
 
     return tk.render(
         "check_link/package_report.html",
@@ -120,9 +119,7 @@ def report(
     }
     params.update(parse_params(tk.request.args))
 
-    data_settings = {}
-
-    collection = shared.get_collection(col_name, params, data_settings=data_settings)
+    collection = shared.get_collection(col_name, params)
 
     base_template = "check_link/base_admin.html"
 
