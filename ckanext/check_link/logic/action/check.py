@@ -157,7 +157,7 @@ def _search_check(
     if not pairs:
         return {"reports": []}
 
-    patches, urls = zip(*pairs)
+    patches, urls = zip(*pairs, strict=False)
 
     result = tk.get_action("check_link_url_check")(
         context,
@@ -168,7 +168,7 @@ def _search_check(
         },
     )
 
-    reports = [dict(report, **patch) for patch, report in zip(patches, result)]
+    reports = [dict(report, **patch) for patch, report in zip(patches, result, strict=False)]
     if data_dict["save"]:
         _save_reports(context, reports, data_dict["clear_available"])
 

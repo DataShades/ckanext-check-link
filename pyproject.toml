@@ -6,7 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "ckanext-check-link"
 version = "0.3.1"
 description = "Resource URL checker"
-classifiers = [ "Development Status :: 4 - Beta", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11",]
+classifiers = [
+            "Development Status :: 4 - Beta",
+            "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+]
 keywords = [ "CKAN",]
 dependencies = [ "check-link~=0.0.11", "typing-extensions", "ckanext-toolbelt", "ckanext-collection"]
 authors = [
@@ -45,32 +53,36 @@ ckan = "ckan.lib.extract:extract_ckan"
 [tool.setuptools.packages]
 find = {}
 
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
 [tool.ruff.lint]
 select = [
        "ANN0", # type annotations for function arguments
        "B",  # likely bugs and design problems
-       # "BLE",  # do not catch blind exception
+       "BLE",  # do not catch blind exception
        "C4",  # better list/set/dict comprehensions
-       # "C90",  # check McCabe complexity
-       # "DTZ", # enforce timezone in date objects
+       "C90",  # check McCabe complexity
+       "DTZ", # enforce timezone in date objects
        "E",  # pycodestyle error
-       # "W",  # pycodestyle warning
+       "W",  # pycodestyle warning
        "F",  # pyflakes
        "FA", # verify annotations from future
        "G",  # format strings for logging statements
        "N",  # naming conventions
        "I",  # isort
        "ICN", # import conventions
-       # # "D1",  # require doc
+       # "D1",  # require doc
        "D2",  # doc formatting
        "D4",  # doc convention
        "PL",  # pylint
-       # "PERF", # performance anti-patterns
+       "PERF", # performance anti-patterns
        "PT",  # pytest style
        "PIE",  # misc lints
        "RET",  # improvements for return statements
        "RSE",  # improvements for rise statements
-       # "S",  # security testing
+       "S",  # security testing
        "SIM",  # simplify code
        "T10",  # debugging statements
        "T20",  # print statements
@@ -82,9 +94,7 @@ select = [
 ignore = [
        "RET503", # don't enforce return-None
        "E712", # comparison to bool: violated by SQLAlchemy filters
-       "PT004", # fixture does not return anything, add leading underscore: violated by clean_db
        "PLC1901", # simplify comparison to empty string: violated by SQLAlchemy filters
-       "PLR0913", # big number of function arguments
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -118,21 +128,17 @@ ckan = ["ckan"]
 ckanext = ["ckanext"]
 self = ["ckanext.check_link"]
 
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "--ckan-ini test.ini"
-filterwarnings = [
-               "ignore::sqlalchemy.exc.SADeprecationWarning",
-               "ignore::sqlalchemy.exc.SAWarning",
-               "ignore::DeprecationWarning",
-]
 
 [tool.pyright]
-pythonVersion = "3.8"
+extraPaths = [
+           "../ckan",
+]
+pythonVersion = "3.10"
 include = ["ckanext"]
 exclude = [
-    "**/test*",
     "**/migration",
 ]
 strict = []
@@ -200,11 +206,5 @@ reportUnsupportedDunderAll = true
 reportUnusedCoroutine = true
 reportUnnecessaryTypeIgnoreComment = true
 reportMatchNotExhaustive = true
-
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.0.1"
-tag_format = "v$version"
-version_files = ["setup.cfg:version", "setup.py:version"]
-major_version_zero = true
-changelog_incremental = true
+reportExplicitAny = false
+reportAny = false
