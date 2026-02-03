@@ -58,42 +58,32 @@ def base_search_check(
 
 
 @validator_args
-def package_check(
-    not_missing: types.Validator, package_id_or_name_exists: types.Validator
-) -> types.Schema:
+def package_check(not_missing: types.Validator, package_id_or_name_exists: types.Validator) -> types.Schema:
     return dict(base_search_check(), id=[not_missing, package_id_or_name_exists])
 
 
 @validator_args
-def organization_check(
-    not_missing: types.Validator, convert_group_name_or_id_to_id: types.Validator
-) -> types.Schema:
+def organization_check(not_missing: types.Validator, convert_group_name_or_id_to_id: types.Validator):
     return dict(base_search_check(), id=[not_missing, convert_group_name_or_id_to_id])
 
 
 @validator_args
-def group_check(
-    not_missing: types.Validator, group_id_or_name_exists: types.Validator
-) -> types.Schema:
+def group_check(not_missing: types.Validator, group_id_or_name_exists: types.Validator):
     return dict(base_search_check(), id=[not_missing, group_id_or_name_exists])
 
 
 @validator_args
-def user_check(
-    not_missing: types.Validator, convert_user_name_or_id_to_id: types.Validator
-) -> types.Schema:
+def user_check(not_missing: types.Validator, convert_user_name_or_id_to_id: types.Validator):
     return dict(base_search_check(), id=[not_missing, convert_user_name_or_id_to_id])
 
 
 @validator_args
-def search_check(
-    unicode_safe: types.Validator, default: types.ValidatorFactory
-) -> types.Schema:
+def search_check(unicode_safe: types.Validator, default: types.ValidatorFactory):
     return dict(base_search_check(), fq=[default("*:*"), unicode_safe])
 
 
 @validator_args
-def report_save(
+def report_save(# noqa: PLR0913
     unicode_safe: types.Validator,
     resource_id_exists: types.Validator,
     ignore_missing: types.Validator,
@@ -112,9 +102,7 @@ def report_save(
 
 @validator_args
 def report_show(
-    unicode_safe: types.Validator,
-    ignore_missing: types.Validator,
-    resource_id_exists: types.Validator,
+    unicode_safe: types.Validator, ignore_missing: types.Validator, resource_id_exists: types.Validator
 ) -> types.Schema:
     return {
         "id": [ignore_missing, unicode_safe],

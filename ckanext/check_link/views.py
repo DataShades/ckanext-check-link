@@ -1,8 +1,13 @@
+"""Views module for the ckanext-check-link extension.
+
+This module provides Flask blueprints and view functions for the administrative
+UI components of the link checking extension, including the report page and CSV export.
+"""
+
 from __future__ import annotations
 
 import csv
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from flask import Blueprint
 
@@ -12,10 +17,7 @@ from ckan.logic import parse_params
 
 from ckanext.collection import shared
 
-if TYPE_CHECKING:
-    from ckan.types import Context
-
-
+# Define the columns for the CSV export of link check reports
 CSV_COLUMNS = [
     "Data Record title",
     "Data Resource title",
@@ -133,11 +135,29 @@ def report(
 
 
 class _FakeBuffer:
+    """A fake buffer class for CSV writing that yields values instead of writing to a file."""
+
     def write(self, value: Any):
+        """Write method that returns the value instead of writing to a file.
+
+        Args:
+            value: The value to write
+
+        Returns:
+            The value that was "written"
+        """
         return value
 
 
-def _stream_csv(reports: Iterable[dict[str, Any]]):
+def _stream_csv(reports: Any):
+    """Generate CSV rows for the provided reports.
+
+    Args:
+        reports: Iterable of report dictionaries to convert to CSV
+
+    Yields:
+        CSV row strings
+    """
     writer = csv.writer(_FakeBuffer())
 
     yield writer.writerow(CSV_COLUMNS)
@@ -164,21 +184,3 @@ def _stream_csv(reports: Iterable[dict[str, Any]]):
                 tk.h.render_datetime(report["created_at"], None, True),
             ]
         )
-
-
-def _iterate_resuts(
-    action: str,
-    params: dict[str, Any],
-    context: Context | None = None,
-    offset: int = 0,
-    chunk_size: int = 10,
-) -> Iterable[dict[str, Any]]:
-    while True:
-        result = tk.get_action(action)(
-            context or {},
-            dict(params, limit=chunk_size, offset=offset),
-        )
-        yield from result["results"]
-        offset += chunk_size
-        if offset >= result["count"]:
-            break

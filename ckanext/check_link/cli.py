@@ -1,3 +1,9 @@
+"""Command-line interface module for the ckanext-check-link extension.
+
+This module provides Click commands for performing link checking operations
+from the command line, including checking packages, resources, and managing reports.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -22,16 +28,12 @@ __all__ = ["check_link"]
 
 @click.group(short_help="Check link availability")
 def check_link():
-    pass
+    """Main command group for link checking operations."""
 
 
 @check_link.command()
-@click.option(
-    "-d", "--include-draft", is_flag=True, help="Check draft packages as well"
-)
-@click.option(
-    "-p", "--include-private", is_flag=True, help="Check private packages as well"
-)
+@click.option("-d", "--include-draft", is_flag=True, help="Check draft packages as well")
+@click.option("-p", "--include-private", is_flag=True, help="Check private packages as well")
 @click.option(
     "-c",
     "--chunk",
@@ -41,19 +43,15 @@ def check_link():
         1,
     ),
 )
-@click.option(
-    "-d", "--delay", default=0, help="Delay between requests", type=click.FloatRange(0)
-)
-@click.option(
-    "-t", "--timeout", default=10, help="Request timeout", type=click.FloatRange(0)
-)
+@click.option("-d", "--delay", default=0, help="Delay between requests", type=click.FloatRange(0))
+@click.option("-t", "--timeout", default=10, help="Request timeout", type=click.FloatRange(0))
 @click.option(
     "-o",
     "--organization",
     help="Check packages of specific organization",
 )
 @click.argument("ids", nargs=-1)
-def check_packages(
+def check_packages(  # noqa: PLR0913
     include_draft: bool,
     include_private: bool,
     ids: tuple[str, ...],
@@ -67,6 +65,13 @@ def check_packages(
     Scope can be narrowed via arbitary number of arguments, specifying
     package's ID or name.
 
+    Args:
+        include_draft: Whether to include draft packages in the check
+        include_private: Whether to include private packages in the check
+        ids: Specific package IDs or names to check (checks all if empty)
+        chunk: Number of packages to process simultaneously
+        delay: Delay between requests in seconds
+        timeout: Request timeout in seconds
     """
     user = tk.get_action("get_site_user")({"ignore_auth": True}, {})
     context = types.Context(user=user["name"])
@@ -93,7 +98,7 @@ def check_packages(
     if ids:
         stmt = stmt.where(model.Package.id.in_(ids) | model.Package.name.in_(ids))
 
-    stats = Counter()
+    stats: Counter[str] = Counter()
     total = model.Session.scalar(sa.select(sa.func.count()).select_from(stmt))
     with click.progressbar(model.Session.scalars(stmt), length=total) as bar:
         while True:
@@ -117,9 +122,7 @@ def check_packages(
             stats.update(r["state"] for r in result)
             overview = (
                 ", ".join(
-                    f"{click.style(k,  underline=True)}:"
-                    f" {click.style(str(v),bold=True)}"
-                    for k, v in stats.items()
+                    f"{click.style(k, underline=True)}: {click.style(str(v), bold=True)}" for k, v in stats.items()
                 )
                 or "not available"
             )
@@ -130,32 +133,42 @@ def check_packages(
 
 
 def _take(seq: Iterable[T], size: int) -> list[T]:
+    """Take a specified number of items from an iterable sequence.
+
+    Args:
+        seq: The iterable sequence to take items from
+        size: The number of items to take
+
+    Returns:
+        A list containing the taken items
+    """
     return list(islice(seq, size))
 
 
 @check_link.command()
-@click.option(
-    "-d", "--delay", default=0, help="Delay between requests", type=click.FloatRange(0)
-)
-@click.option(
-    "-t", "--timeout", default=10, help="Request timeout", type=click.FloatRange(0)
-)
+@click.option("-d", "--delay", default=0, help="Delay between requests", type=click.FloatRange(0))
+@click.option("-t", "--timeout", default=10, help="Request timeout", type=click.FloatRange(0))
 @click.argument("ids", nargs=-1)
 def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
     """Check every resource on the portal.
 
     Scope can be narrowed via arbitary number of arguments, specifying
     resource's ID.
+
+    Args:
+        ids: Specific resource IDs to check (checks all if empty)
+        delay: Delay between requests in seconds
+        timeout: Request timeout in seconds
     """
     user = tk.get_action("get_site_user")({"ignore_auth": True}, {})
-    context = {"user": user["name"]}
+    context: types.Context = {"user": user["name"]}
 
     check = tk.get_action("check_link_resource_check")
     q = model.Session.query(model.Resource.id).filter_by(state="active")
     if ids:
         q = q.filter(model.Resource.id.in_(ids))
 
-    stats = Counter()
+    stats: Counter[str] = Counter()
     total = q.count()
     overview = "Not ready yet"
     with click.progressbar(q, length=total) as bar:
@@ -163,7 +176,7 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
             bar.label = f"Current: {res.id}. Overview({total} total): {overview}"
             try:
                 result = check(
-                    context.copy(),
+                    tk.fresh_context(context),
                     {
                         "save": True,
                         "clear_available": True,
@@ -178,9 +191,7 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
             stats[result["state"]] += 1
             overview = (
                 ", ".join(
-                    f"{click.style(k,  underline=True)}:"
-                    f" {click.style(str(v),bold=True)}"
-                    for k, v in stats.items()
+                    f"{click.style(k, underline=True)}: {click.style(str(v), bold=True)}" for k, v in stats.items()
                 )
                 or "not available"
             )
@@ -197,18 +208,24 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
     help="Only drop reports that point to an unexisting resource",
 )
 def delete_reports(orphans_only: bool):
-    """Delete check-link reports."""
+    """Delete check-link reports.
+
+    Args:
+        orphans_only: If True, only delete reports that point to non-existing resources
+    """
     q = model.Session.query(Report)
     if orphans_only:
+        # Find reports that are associated with a resource ID but where the resource
+        # either doesn't exist anymore or is not in an active state
         q = q.outerjoin(model.Resource, Report.resource_id == model.Resource.id).filter(
             Report.resource_id.isnot(None),
             model.Resource.id.is_(None) | (model.Resource.state != "active"),
         )
 
     user = tk.get_action("get_site_user")({"ignore_auth": True}, {})
-    context = {"user": user["name"]}
+    context: types.Context = {"user": user["name"]}
 
     action = tk.get_action("check_link_report_delete")
     with click.progressbar(q, length=q.count()) as bar:
         for report in bar:
-            action(context.copy(), {"id": report.id})
+            action(tk.fresh_context(context), {"id": report.id})
