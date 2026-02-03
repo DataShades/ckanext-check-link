@@ -2,6 +2,7 @@
 
 This module provides Click commands for performing link checking operations
 from the command line, including checking packages, resources, and managing reports.
+The CLI interface is designed for bulk operations and automation tasks.
 """
 
 from __future__ import annotations
@@ -28,7 +29,11 @@ __all__ = ["check_link"]
 
 @click.group(short_help="Check link availability")
 def check_link():
-    """Main command group for link checking operations."""
+    """Main command group for link checking operations.
+
+    This command group provides access to all link checking CLI commands,
+    including package checking, resource checking, and report management.
+    """
 
 
 @check_link.command()
@@ -62,8 +67,11 @@ def check_packages(  # noqa: PLR0913
 ):
     """Check every resource inside each package.
 
-    Scope can be narrowed via arbitary number of arguments, specifying
-    package's ID or name.
+    This command performs comprehensive link checking for all resources within
+    specified packages. It supports various filtering options and can process
+    packages in configurable chunks for better performance with large datasets.
+    The command provides real-time progress feedback with statistics on the
+    distribution of link states (available, broken, etc.).
 
     Args:
         include_draft: Whether to include draft packages in the check
@@ -72,6 +80,7 @@ def check_packages(  # noqa: PLR0913
         chunk: Number of packages to process simultaneously
         delay: Delay between requests in seconds
         timeout: Request timeout in seconds
+        organization: Specific organization to check packages from
     """
     user = tk.get_action("get_site_user")({"ignore_auth": True}, {})
     context = types.Context(user=user["name"])
@@ -135,6 +144,9 @@ def check_packages(  # noqa: PLR0913
 def _take(seq: Iterable[T], size: int) -> list[T]:
     """Take a specified number of items from an iterable sequence.
 
+    This internal utility function extracts a specified number of items
+    from an iterable sequence, which is useful for processing data in chunks.
+
     Args:
         seq: The iterable sequence to take items from
         size: The number of items to take
@@ -152,8 +164,10 @@ def _take(seq: Iterable[T], size: int) -> list[T]:
 def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
     """Check every resource on the portal.
 
-    Scope can be narrowed via arbitary number of arguments, specifying
-    resource's ID.
+    This command performs link checking for all active resources in the portal.
+    It can be scoped to specific resources by providing their IDs as arguments.
+    The command provides real-time progress feedback with statistics on the
+    distribution of link states (available, broken, etc.).
 
     Args:
         ids: Specific resource IDs to check (checks all if empty)
