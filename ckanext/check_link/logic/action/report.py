@@ -1,7 +1,8 @@
 """Action functions for managing link check reports.
 
 This module contains API action functions for saving, retrieving, searching,
-and deleting link check reports in the database.
+and deleting link check reports in the database. These actions provide the
+foundation for report management functionality in the extension.
 """
 
 from __future__ import annotations
@@ -26,8 +27,13 @@ action, get_actions = Collector("check_link").split()
 def report_save(context: types.Context, data_dict: dict[str, Any]):
     """Save a link check report to the database.
 
+    This action creates or updates a link check report in the database. If a report
+    already exists for the same URL and resource combination, it updates the existing
+    record rather than creating a duplicate. The action handles both new reports and
+    updates to existing reports.
+
     Args:
-        context: CKAN context dictionary
+        context: CKAN context dictionary containing user and session information
         data_dict: Dictionary containing:
             - id: Report ID (auto-generated if not provided)
             - url: URL that was checked
@@ -37,18 +43,22 @@ def report_save(context: types.Context, data_dict: dict[str, Any]):
             - package_id: Associated package ID (optional)
 
     Returns:
-        Dictionary representing the saved report
+        Dictionary representing the saved report with all its properties
     """
     tk.check_access("check_link_report_save", context, data_dict)
     sess = context["session"]
+    # Move extra fields to details dictionary
     data_dict["details"].update(data_dict.pop("__extras", {}))
 
     try:
+        # Check if a report already exists for this URL/resource combination
         existing = tk.get_action("check_link_report_show")(context, data_dict)
     except tk.ObjectNotFound:
+        # Create a new report if one doesn't exist
         report = Report(**{**data_dict, "id": None})
         sess.add(report)
     else:
+        # Update the existing report with new information
         report = sess.query(Report).filter(Report.id == existing["id"]).one()
         # Update the timestamp and refresh the report data with new values
         # Note: This updates the existing report in place rather than creating a new one
@@ -68,15 +78,19 @@ def report_save(context: types.Context, data_dict: dict[str, Any]):
 def report_show(context: types.Context, data_dict: dict[str, Any]):
     """Retrieve a specific link check report.
 
+    This action retrieves a single link check report from the database based on
+    the provided identifier. It supports lookup by report ID, resource ID, or URL,
+    providing flexibility in how reports can be accessed.
+
     Args:
-        context: CKAN context dictionary
+        context: CKAN context dictionary containing user and session information
         data_dict: Dictionary containing one of:
             - id: Report ID
             - resource_id: Resource ID to find report for
             - url: URL to find report for
 
     Returns:
-        Dictionary representing the report
+        Dictionary representing the report with all its properties
 
     Raises:
         ValidationError: If no identifier is provided
@@ -104,8 +118,12 @@ def report_show(context: types.Context, data_dict: dict[str, Any]):
 def report_search(context: types.Context, data_dict: dict[str, Any]):
     """Search for link check reports with various filtering options.
 
+    This action provides flexible search capabilities for link check reports,
+    supporting various filtering options to find specific reports or subsets
+    of reports. It includes pagination support for handling large result sets.
+
     Args:
-        context: CKAN context dictionary
+        context: CKAN context dictionary containing user and session information
         data_dict: Dictionary containing:
             - limit: Maximum number of results to return (default: 10)
             - offset: Offset for pagination (default: 0)
@@ -115,7 +133,8 @@ def report_search(context: types.Context, data_dict: dict[str, Any]):
             - free_only: Only return reports not attached to resources (default: False)
 
     Returns:
-        Dictionary with 'count' and 'results' keys
+        Dictionary with 'count' and 'results' keys, where results contain
+        the matching reports with associated resource and package information
 
     Raises:
         ValidationError: If conflicting filters are applied
@@ -123,24 +142,29 @@ def report_search(context: types.Context, data_dict: dict[str, Any]):
     tk.check_access("check_link_report_search", context, data_dict)
     q = context["session"].query(Report)
 
+    # Validate that mutually exclusive filters are not used together
     if data_dict["free_only"] and data_dict["attached_only"]:
         raise tk.ValidationError(
             {"free_only": ["Filters `attached_only` and `free_only` cannot be applied simultaneously"]}
         )
 
+    # Apply filters based on resource attachment status
     if data_dict["free_only"]:
         q = q.filter(Report.resource_id.is_(None))
 
     if data_dict["attached_only"]:
         q = q.filter(Report.resource_id.isnot(None))
 
+    # Apply state-based filters
     if "exclude_state" in data_dict:
         q = q.filter(Report.state.notin_(data_dict["exclude_state"]))
 
     if "include_state" in data_dict:
         q = q.filter(Report.state.in_(data_dict["include_state"]))
 
+    # Get total count before applying pagination
     count = q.count()
+    # Order by creation date descending and apply pagination
     q = q.order_by(Report.created_at.desc())
     q = q.limit(data_dict["limit"]).offset(data_dict["offset"])
 
@@ -155,15 +179,19 @@ def report_search(context: types.Context, data_dict: dict[str, Any]):
 def report_delete(context: types.Context, data_dict: dict[str, Any]):
     """Delete a specific link check report.
 
+    This action removes a link check report from the database based on the
+    provided identifier. It supports deletion by report ID, resource ID, or URL,
+    providing flexibility in how reports can be removed.
+
     Args:
-        context: CKAN context dictionary
+        context: CKAN context dictionary containing user and session information
         data_dict: Dictionary containing one of:
             - id: Report ID
             - resource_id: Resource ID of report to delete
             - url: URL of report to delete
 
     Returns:
-        Dictionary representing the deleted report
+        Dictionary representing the deleted report before it was removed
     """
     tk.check_access("check_link_report_delete", context, data_dict)
     sess = context["session"]

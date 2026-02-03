@@ -51,7 +51,9 @@ class CheckLinkPlugin(
             entity: The domain object being modified (expected to be a Resource)
             operation: The type of operation being performed (create, update, delete)
         """
+        # Only process resource deletion events
         if isinstance(entity, model.Resource) and entity.state == "deleted":
+            # Check if cascade deletion is enabled in configuration
             if tk.asbool(tk.config.get(CONFIG_CASCADE_DELETE)):
                 _remove_resource_report(entity.id)
 

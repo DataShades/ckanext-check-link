@@ -2,6 +2,8 @@
 
 This module provides Flask blueprints and view functions for the administrative
 UI components of the link checking extension, including the report page and CSV export.
+These views enable administrators to monitor and manage link check reports through
+a web interface.
 """
 
 from __future__ import annotations
@@ -35,6 +37,18 @@ __all__ = ["bp"]
 
 @bp.route("/organization/<organization_id>/check-link/report")
 def organization_report(organization_id: str):
+    """Display link check reports for a specific organization.
+
+    This view renders a page showing link check reports for all resources
+    within a specific organization. It requires appropriate authorization
+    and provides filtering options for the reports.
+
+    Args:
+        organization_id: The ID of the organization to show reports for
+
+    Returns:
+        Rendered HTML template with organization-specific link check reports
+    """
     try:
         tk.check_access(
             "check_link_view_report_page",
@@ -71,6 +85,18 @@ def organization_report(organization_id: str):
 
 @bp.route("/dataset/<package_id>/check-link/report")
 def package_report(package_id: str):
+    """Display link check reports for a specific package.
+
+    This view renders a page showing link check reports for all resources
+    within a specific package. It requires appropriate authorization
+    and provides filtering options for the reports.
+
+    Args:
+        package_id: The ID of the package to show reports for
+
+    Returns:
+        Rendered HTML template with package-specific link check reports
+    """
     try:
         tk.check_access(
             "check_link_view_report_page",
@@ -105,6 +131,19 @@ def report(
     organization_id: str | None = None,
     package_id: str | None = None,
 ):
+    """Display global link check reports.
+
+    This view renders the main page showing link check reports for the entire
+    portal. It provides a comprehensive overview of broken links across all
+    packages and resources. The view supports filtering and pagination.
+
+    Args:
+        organization_id: Optional organization ID to filter reports
+        package_id: Optional package ID to filter reports
+
+    Returns:
+        Rendered HTML template with global link check reports
+    """
     try:
         tk.check_access(
             "check_link_view_report_page",
@@ -135,10 +174,17 @@ def report(
 
 
 class _FakeBuffer:
-    """A fake buffer class for CSV writing that yields values instead of writing to a file."""
+    """A fake buffer class for CSV writing that yields values instead of writing to a file.
+
+    This internal class is used to generate CSV content without actually writing
+    to a file, allowing the CSV content to be streamed as a response.
+    """
 
     def write(self, value: Any):
         """Write method that returns the value instead of writing to a file.
+
+        This method is designed to work with the csv.writer class to intercept
+        the write operations and return the values instead of writing to a file.
 
         Args:
             value: The value to write
@@ -152,22 +198,31 @@ class _FakeBuffer:
 def _stream_csv(reports: Any):
     """Generate CSV rows for the provided reports.
 
+    This internal function generates CSV content for link check reports,
+    which can be used for exporting reports to CSV format. It includes
+    caching for organization data to improve performance.
+
     Args:
         reports: Iterable of report dictionaries to convert to CSV
 
     Yields:
-        CSV row strings
+        CSV row strings formatted according to the defined column structure
     """
     writer = csv.writer(_FakeBuffer())
 
+    # Write the header row
     yield writer.writerow(CSV_COLUMNS)
+    # Cache organization data to avoid repeated database queries
     _org_cache = {}
 
     for report in reports:
+        # Get the organization ID for this report
         owner_org = report["details"]["package"]["owner_org"]
+        # Cache organization data to avoid repeated database queries
         if owner_org not in _org_cache:
             _org_cache[owner_org] = model.Group.get(owner_org)
 
+        # Write the data row for this report
         yield writer.writerow(
             [
                 report["details"]["package"]["title"],

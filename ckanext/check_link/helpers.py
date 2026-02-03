@@ -2,6 +2,8 @@
 
 This module provides helper functions that can be used in Jinja2 templates
 to customize the behavior of the link checking extension in the UI.
+These helpers enable conditional rendering of UI elements based on
+configuration settings.
 """
 
 from __future__ import annotations
@@ -17,7 +19,8 @@ def check_link_show_header_link() -> bool:
 
     This helper function checks the configuration setting to determine
     whether the link checking functionality should be accessible from
-    the header navigation.
+    the header navigation. This allows administrators to control the
+    visibility of the link checking UI elements based on their needs.
 
     Returns:
         True if the header link should be shown, False otherwise

@@ -93,6 +93,7 @@ def check_packages(  # noqa: PLR0913
 
     stmt = sa.select(model.Package.id).where(model.Package.state.in_(states))
 
+    # Filter by organization if specified
     if organization:
         stmt = stmt.join(model.Group, model.Package.owner_org == model.Group.id).where(
             sa.or_(
@@ -101,9 +102,11 @@ def check_packages(  # noqa: PLR0913
             )
         )
 
+    # Exclude private packages if not requested
     if not include_private:
         stmt = stmt.where(model.Package.private == False)
 
+    # Filter by specific package IDs/names if provided
     if ids:
         stmt = stmt.where(model.Package.id.in_(ids) | model.Package.name.in_(ids))
 
@@ -178,6 +181,7 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
     context: types.Context = {"user": user["name"]}
 
     check = tk.get_action("check_link_resource_check")
+    # Query for active resources, optionally filtered by specific IDs
     q = model.Session.query(model.Resource.id).filter_by(state="active")
     if ids:
         q = q.filter(model.Resource.id.in_(ids))
@@ -189,6 +193,7 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
         for res in bar:
             bar.label = f"Current: {res.id}. Overview({total} total): {overview}"
             try:
+                # Perform the link check for the current resource
                 result = check(
                     tk.fresh_context(context),
                     {
@@ -199,9 +204,11 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
                     },
                 )
             except tk.ValidationError:
+                # Log validation errors and mark as exception state
                 log.exception("Cannot check %s", res.id)
                 result = {"state": "exception"}
 
+            # Update statistics with the result
             stats[result["state"]] += 1
             overview = (
                 ", ".join(
@@ -224,6 +231,11 @@ def check_resources(ids: tuple[str, ...], delay: float, timeout: float):
 def delete_reports(orphans_only: bool):
     """Delete check-link reports.
 
+    This command provides the ability to clean up link check reports from the database.
+    It can delete all reports or only orphaned reports that point to resources that
+    no longer exist or are not in an active state. This helps maintain a clean
+    database by removing obsolete reports.
+
     Args:
         orphans_only: If True, only delete reports that point to non-existing resources
     """
@@ -242,4 +254,5 @@ def delete_reports(orphans_only: bool):
     action = tk.get_action("check_link_report_delete")
     with click.progressbar(q, length=q.count()) as bar:
         for report in bar:
+            # Delete each report individually
             action(tk.fresh_context(context), {"id": report.id})

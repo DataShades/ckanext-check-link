@@ -2,6 +2,7 @@
 
 This module defines the SQLAlchemy model for storing link check reports
 with details about the URL, state, and associated resources/packages.
+The model provides methods for database operations and data conversion.
 """
 
 from __future__ import annotations
@@ -26,9 +27,11 @@ import ckan.plugins.toolkit as tk
 class Report(tk.BaseModel):
     """Database model for storing link check reports.
 
-    Each report contains information about a URL check including the URL,
-    state (available/broken), timestamp, and optional associations with
-    CKAN resources and packages.
+    This model represents a single link check report in the database. Each report
+    contains information about a URL check including the URL, state (available/broken),
+    timestamp, and optional associations with CKAN resources and packages. The model
+    provides methods for database operations and data conversion to support the
+    link checking functionality.
     """
 
     __table__: sa.Table = sa.Table(
@@ -65,18 +68,28 @@ class Report(tk.BaseModel):
     )
 
     def touch(self):
-        """Update the created_at timestamp to the current time."""
+        """Update the created_at timestamp to the current time.
+
+        This method updates the report's creation timestamp to the current
+        UTC time, which is useful for tracking when the report was last
+        accessed or modified.
+        """
         self.created_at = datetime.utcnow()
 
     def dictize(self, context: types.Context) -> dict[str, Any]:
         """Convert the report object to a dictionary representation.
+
+        This method transforms the report object into a dictionary format
+        that can be used for API responses or template rendering. It
+        optionally includes associated resource and package information
+        based on the context flags.
 
         Args:
             context: CKAN context dictionary that may contain flags for including
                     resource and package information
 
         Returns:
-            Dictionary representation of the report
+            Dictionary representation of the report with associated data
         """
         result = table_dictize(self, context, package_id=self.package_id)
 
@@ -92,6 +105,10 @@ class Report(tk.BaseModel):
     def by_resource_id(cls, id_: str) -> Self | None:
         """Find a report by its associated resource ID.
 
+        This class method queries the database for a report associated with
+        a specific resource ID. It's commonly used to retrieve the most
+        recent check result for a particular resource.
+
         Args:
             id_: The resource ID to search for
 
@@ -106,6 +123,10 @@ class Report(tk.BaseModel):
     @classmethod
     def by_url(cls, url: str) -> Self | None:
         """Find a report by URL for free-standing reports (not associated with a resource).
+
+        This class method queries the database for a report associated with
+        a specific URL that is not linked to any resource. This is used for
+        checking arbitrary URLs that are not part of CKAN resources.
 
         Args:
             url: The URL to search for
