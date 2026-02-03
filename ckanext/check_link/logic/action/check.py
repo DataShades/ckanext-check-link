@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import contextlib
 import logging
+from collections.abc import Iterable
 from itertools import islice
-from typing import Any, Iterable
+from typing import Any
 
 from check_link import Link, check_all
 

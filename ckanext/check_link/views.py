@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import csv
-from typing import TYPE_CHECKING, Any, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any
 
 from flask import Blueprint
 
@@ -10,7 +11,6 @@ from ckan import model
 from ckan.logic import parse_params
 
 from ckanext.collection import shared
-
 
 if TYPE_CHECKING:
     from ckan.types import Context

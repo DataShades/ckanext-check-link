@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
+from collections.abc import Iterable
 from itertools import islice
-from typing import Iterable, TypeVar
+from typing import TypeVar
 
 import click
 import sqlalchemy as sa

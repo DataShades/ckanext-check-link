@@ -8,7 +8,7 @@ import ckan.plugins.toolkit as tk
 from ckan.tests.helpers import call_action
 
 
-@pytest.fixture()
+@pytest.fixture
 def rmock(httpx_mock):
     return httpx_mock
 

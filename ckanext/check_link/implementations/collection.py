@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 from typing import Any
 
 import sqlalchemy as sa
 
-from ckan import model
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
+from ckan import model
 
 from ckanext.collection import shared
 
