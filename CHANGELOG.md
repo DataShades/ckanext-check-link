@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [v0.4.0](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.4.0) - 2026-08-21
+
+<small>[Compare with v0.3.1](https://github.com/DataShades/ckanext-check-link/compare/v0.3.1...v0.4.0)</small>
+
+### Features
+
+- drop support of CKAN v2.9 ([d3008d2](https://github.com/DataShades/ckanext-check-link/commit/d3008d23ecfb04e76786e55f5e1e0f36ee0d0212) by Sergey Motornyuk).
+
 ## [v0.3.1](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.3.1) - 2025-05-26
 
 <small>[Compare with v0.3.0](https://github.com/DataShades/ckanext-check-link/compare/v0.3.0...v0.3.1)</small>
@@ -116,7 +124,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - configurable timeout ([7fb1dfc](https://github.com/DataShades/ckanext-check-link/commit/7fb1dfc2fbf7719c7f4b4df937ff547a02c290b7) by Sergey Motornyuk).
 
-## [v0.0.12](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.0.12) - 2022-08-25
+## [v0.0.12](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.0.12) - 2022-08-26
 
 <small>[Compare with v0.0.11](https://github.com/DataShades/ckanext-check-link/compare/v0.0.11...v0.0.12)</small>
 
@@ -140,7 +148,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <small>[Compare with v0.0.8](https://github.com/DataShades/ckanext-check-link/compare/v0.0.8...v0.0.9)</small>
 
-## [v0.0.8](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.0.8) - 2022-07-19
+## [v0.0.8](https://github.com/DataShades/ckanext-check-link/releases/tag/v0.0.8) - 2022-07-20
 
 <small>[Compare with v0.0.7](https://github.com/DataShades/ckanext-check-link/compare/v0.0.7...v0.0.8)</small>
 

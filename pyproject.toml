@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-check-link"
-version = "0.3.1"
+version = "0.4.0"
 description = "Resource URL checker"
 classifiers = [
             "Development Status :: 4 - Beta",
